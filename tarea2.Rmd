@@ -1,0 +1,264 @@
+---
+title: "Tarea 2"
+author: "Carolina Alvarez"
+date: "16/2/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## Tarea 2
+
+Carolina Álvarez Márquez
+
+16/02/2022
+
+1.  Considera las siguientes cantidades discute y justifica qué tipo de distribución de probabilidad pueden tener las siguientes variables:
+
+    *a) El número (talla) de calzado de adultos varones en México.*
+
+    Distribución normal o gaussiana porque el promedio residiría en el centro y solo un número reducido de personas tendría talla de calzado muy grande o muy pequeña. Normalmente las caracteristicas humanas siempre tienden a presentar una distribución gaussiana porque el promedio se concentra en un conjunto de medidas según la población.
+
+    *b) La distribución de habitantes en asentamientos humanos de México.*
+
+    Distribución de cola larga porque hay pocas ciudades muy pobladas en México y hay muchos asentamientos que tienen un número de habitantes reducido por la diversidad cultural y el cantidad de poblaciones indigenas y municipios que hay en cada estado.
+
+    *c) La velocidad promedio de los automóviles en Bernardo Quintana a las 9 de la mañana en un día laborable.*
+
+    Distribución logaritmica o poisson, porque la mayoria de los carros va a ir muy lento y algunos que crean que pueden volar sobre el tráfico van a acelerar mucho. Como no se explicar pongo la siguiente imagen, considere que en el eje x se ve la velocidad de los automóviles en escala creciente y en el eje y la cantidad de autos. La moda tiende a muchos autos a baja velocidad y pocos a velocidad alta.
+
+    ![](images/descarga.png)
+
+    *d) La velocidad promedio de los automóviles en Bernardo Quintana a las 3 de la mañana.*
+
+    Distribución lineal o exponencial. Puede ser lineal porque la velocidad se mantiene constante entre todos los conductores. También puede ser exponencial porque al entrar en Bernardo Quintana y ver que a las 3am esta despejado el camino puedes ir aumentando la velocidad conforme avanzas.
+
+2.  Supongamos que tenemos dos nodos (A,B) en una red. El nodo A y B tiene el mismo degree, pero el A tiene un coeficiente de clusterización de 1 y el nodo B un coeficiente bajo. Dibuja está situación y explica cuál sería una mejor diana si quieres eliminarlos y afectar a la red.
+
+![](images/WhatsApp%20Image%202022-02-16%20at%2011.42.57%20AM.jpeg){width="264"}
+
+A y B tienen el mismo número de conexiones (2), pero A tiene un coeficiente de clusterización de 1 porque todos los nodos alrededor de A están conectados. En B su coeficiente es menor porque no está completamente conectado. Se afectaría mas la red si retiramos el nodo B porque está es el nodo que une a sus vecinos, en cambio si quitamos A los vecinos permanecen unidos.
+
+3.  Elabora un programa en R que usando funciones calcule, a partir de una matriz de adyacencia (Sólo utiliza R base para resolver este problema).
+
+    a)  Si la red es dirigida o no.
+
+    b)  Si la red es pesada o no.
+
+    c)  El degree de los nodos.
+
+    d)  El histograma del degree.
+
+``` {.r}
+#Si es o no dirigida depende de si al multiplicar los elementos de la matriz de adyacencia el valor no es igual
+direction <- function(){
+matriz <- read.csv("matriz.csv")
+x <- matriz[2,3]
+y <- matriz[3,2]
+mul <- y*x
+mul1 <- x*y
+dirigida <- if(mul== mul1){
+  print("Es no dirigida")
+}else{print("Es dirigida")}
+}
+
+#Una red es pesada si hay mas de una conexión entre los nodos
+pesored <- function(){
+matriz <- read.csv("matriz.csv")
+pesada <- if(matriz==1){
+  print("No es pesada")
+}else{print("Es pesada")}
+}
+
+#Calculo del numero de conexiones por cada nodo
+degreeR <- function(){
+matriz <- read.csv("matriz.csv")
+A <- matriz[1,-1] #separar cada renglon
+B <- matriz[2,-1]
+C <- matriz[3,-1]
+D <- matriz[4,-1]
+E <- matriz[5,-1]
+eF <- matriz[6-1]
+
+sumA <- sum(A) #sumar cuantas conexiones tiene cada nodo
+sumB <- sum(B)
+sumC <- sum(C)
+sumD <- sum(D)
+sumE <- sum(E)
+sumF <- sum(eF)
+
+#juntar las sumas en un vector
+deg <- c(sumA, sumB, sumC, sumD, sumE, sumF)
+names(deg) <- c("A","B","C","D","E","F") #asignar nombres de identificación
+histdeg <- hist(deg) #hacer el histograma
+}
+```
+
+A partir de la red de interacción de proteínas alojada en la librería igraphdata, que puedes llamar mediante data(yeast) elabora un programa en R (acá sí puedes usar librerías especializadas de R) que:
+
+``` {.r}
+#Cargar o instalar las siguientes librerias
+library(igraph)
+library(igraphdata)
+```
+
+a)  *Calcule la distribución de conectividades y grafique esa distribución . Discute tu resultado.*
+
+``` {.r}
+#Cargar la base de datos "yeast"
+data("yeast")
+#Calcular la distribución de conectividades entre nodos
+distribuciones <- degree.distribution(yeast)
+#Generar un plot de la distribución
+plot(distribuciones, main="Degree distribution", xlab="Degree", ylab="Frequency")
+```
+
+La distribución del número de conexiones entre nodos de la red es de cola larga. Las redes biológicas tienen a tener distribución tipo free-scale que forman una cola larga porque hay nodos con grados de conectividad muy alto (hubs como reguladores maestros) y otros con muy poca conectividad. Esto quiere decir que en esta red de proteínas hay algunas que regulan la función de muchas otras.
+
+*b. Grafique el boxplot de la distribución de conectividades y discute tu resultado.*
+
+``` {.r}
+#Boxplot de la distribución de conectividades
+boxplot(distribuciones)
+```
+
+La mayoria de los estan concentrados en valores de frecuencia menores, y solo un número reducido de nodos presentan frecuencias elevadas. Estos ultimos pueden ser hubs (nodos con alta conectividad) y por lo tanto son proteínas importantes en la red.
+
+*c. Encuentre la proporción de nodos que tienen 15 o más conectividades.*
+
+``` {.r}
+#Calcular el número de conexiones
+con <- degree(yeast)
+#convertirlo a vector
+convec <- as.vector(con)
+#tabla de frecuencia
+contab <- table(convec) 
+#ordenar las frecuencias de mayor a menor
+contab <- sort(contab, decreasing = TRUE)
+#convertir a vector
+as.vector(contab)
+#calcular el total de conexiones en la red
+suma <- sum(contab) 
+#seleccionar los nodos con 15 o mas conexiones
+mayores <- contab[1:23]
+#calcular el total de conexiones de los mayores o iguales a 15
+sumamayores <- sum(mayores)
+#CALCULO DE PROPORCIÓN
+proporcion <- sumamayores*100/suma
+```
+
+La proporción de nodos con 15 o más conexiones respecto al total de conexiones es de 91.1731% o 2386 nodos.
+
+*d. Calcule el degree máximo de la red.*
+
+``` {.r}
+#Calcular el degree
+dg <- degree(yeast)
+#Ordenar de mayor a menor el número de conexiones
+sort(dg, decreasing = TRUE)
+
+#El degree máximo es de 118 conexiones
+```
+
+*e. Calcule el diámetro*
+
+``` {.r}
+#Diametro = 15
+diameter(yeast)
+```
+
+*f. La trayectoria más larga.*
+
+``` {.r}
+distances(yeast)
+```
+
+*g. Elimine los 10 nodos más conectados de la red y determine el diámetro cada vez que lo haga.*
+
+``` {.r}
+#Diametro cero: 15
+diameter(yeast)
+#Diametro uno: 17
+uno <- delete.vertices(yeast, 610)
+diameter(uno)
+#Diametro dos: 15
+dos <- delete.vertices(yeast, 1131)
+diameter(dos)
+#Diametro tres: 15
+tres <- delete.vertices(yeast, 184)
+diameter(tres)
+#Diametro cuatro: 15
+cuatro <- delete.vertices(yeast, 154)
+diameter(cuatro)
+#Diametro cinco: 15
+cinco <- delete.vertices(yeast, 1007)
+diameter(cinco)
+#Diametro seis: 15
+seis <- delete.vertices(yeast, 1030)
+diameter(seis)
+#Diametro siete: 15
+siete <- delete.vertices(yeast, 252)
+diameter(siete)
+#Diametro ocho: 15
+ocho <- delete.vertices(yeast, 6)
+diameter(ocho)
+#Diametro nueve: 15
+nueve <- delete.vertices(yeast, 2131)
+diameter(nueve)
+#Diametro diez: 15
+diez <- delete.vertices(yeast, 280)
+diameter(diez)
+```
+
+*h. Determine los diez nodos más importantes por al menos tres medidas de centralidad.*
+
+``` {.r}
+#Centralize a graph according to the betweenness of vertices
+betw <- centr_betw(yeast) #calcular la medida
+betw <- as.vector(betw$res) #convertir a vector
+names(betw) <- c(1:2613) #identificar cada nodo por número
+sort(betw, decreasing = TRUE) #ordenar por medida
+
+#Centralize a graph according to the degrees of vertices
+de <- centr_degree(yeast)
+de <- as.vector(de$res)
+names(de) <- c(1:2613)
+sort(de, decreasing = TRUE)
+
+#Centralize a graph according to the closeness of vertices
+clo <- centr_clo(yeast)
+clo <- as.vector(clo$res)
+names(clo) <- c(1:2613)
+sort(clo, decreasing = TRUE)
+```
+
+Con la medida de centralidad 1 y 3 los nodos más importantes son el 610, 1131, 184, 154, 1007, 1030, 252, 6, 2131, 280. Usando la medida de centralidad según los grados de los vertices los más importantes son el 286 698, 713, 70, 123, 139, 722, 723, 842, 65. Las diferencias pueden ser porque el estimador de grados simplemente cuenta el número de conexiones de cada nodo y las otras dos medidas si pueden determinar la importancia del nodo en cuestión de cuantas conexiones tienen y su cercanía.
+
+*i. Clusterizar la red por al menos dos métodos y determinar el tamaño del clúster más grande.*
+
+``` {.r}
+#Método 1: Community structure via greedy optimization of modularity
+cluster1 <- cluster_fast_greedy(yeast)
+table(membership(cluster1)) #tamaño de los clusters
+#el tamaño del cluster más grande es de 744 nodos
+
+#Método 2: Infomap community finding
+cluster2 <- cluster_infomap(yeast)
+table(membership(cluster2)) #tamaño de los clusters
+#El tamaño del cluster más grande es de 291 nodos.
+```
+
+*j. Determine si la red es de mundo pequeño, ultra pequeño u otra.*
+
+``` {.r}
+mean_distance(yeast)
+transitivity(yeast)
+```
+
+Tengo dos opciones de interpretación porque no recuerdo cual es la correcta:
+
+-   La media de la distancia entre los nodos de la red es de 5.095629 conexiones por nodo. No es una red de mundo pequeño porque necesitaria ser un valor cercano a 1 si así fuera.
+
+-   El coeficiente de clusterización es 0.468617 por lo que es una red de mundo pequeño.
+
+![](images/images.jfif "Pov: ya se usar Rmarkdowns"){width="13.2cm"}
